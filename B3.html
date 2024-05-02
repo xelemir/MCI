@@ -217,7 +217,7 @@
             stimulusIsVisible = false;
 
             let timeToWaitInSeconds = Math.random() * 4 + 2; // 2 - 6s
-            timeToWaitInSeconds = 0;
+            //timeToWaitInSeconds = 0;
             testStimulusTimeout = setTimeout(showStimulus, timeToWaitInSeconds * 1000);
         }
 
@@ -282,17 +282,21 @@
                 }
             }
 
-            if (timesDe.length + timesCn.length + timesMx.length >= 30) {
+            /*if (timesDe.length + timesCn.length + timesMx.length >= 30) {
                 stopExperiment();
                 return;
-            }
+            }*/
             
-
-            if (event.key === 'd') {
-                if (stimulusIsVisible) {
+            if (stimulusIsVisible) {
+                if (event.key === 'd') {
                     if (stimulusElement.classList.contains('de')) {
                         recordStimulusReactionTime();
-                        startTestTrial();
+                        if (timesDe.length + timesCn.length + timesMx.length >= 30) {
+                            stopExperiment();
+                            return;
+                        } else {
+                            startTestTrial();
+                        }
                     } else if (stimulusElement.classList.contains('cn')) {
                         errorCountCn++;
                         errorElementCn.textContent = 'Errors: ' + errorCountCn;
@@ -300,13 +304,15 @@
                         errorCountMx++;
                         errorElementMx.textContent = 'Errors: ' + errorCountMx;
                     }
-                }
-
-            } else if (event.key === 'f') {
-                if (stimulusIsVisible) {
+                } else if (event.key === 'f') {
                     if (stimulusElement.classList.contains('cn')) {
                         recordStimulusReactionTime();
-                        startTestTrial();
+                        if (timesDe.length + timesCn.length + timesMx.length >= 30) {
+                            stopExperiment();
+                            return;
+                        } else {
+                            startTestTrial();
+                        }
                     } else if (stimulusElement.classList.contains('de')) {
                         errorCountDe++;
                         errorElementDe.textContent = 'Errors: ' + errorCountDe;
@@ -314,13 +320,15 @@
                         errorCountMx++;
                         errorElementMx.textContent = 'Errors: ' + errorCountMx;
                     }
-                }
-
-            } else if (event.key === 'g') {
-                if (stimulusIsVisible) {
+                } else if (event.key === 'g') {
                     if (stimulusElement.classList.contains('mx')) {
                         recordStimulusReactionTime();
-                        startTestTrial();
+                        if (timesDe.length + timesCn.length + timesMx.length >= 30) {
+                            stopExperiment();
+                            return;
+                        } else {
+                            startTestTrial();
+                        }
                     } else if (stimulusElement.classList.contains('de')) {
                         errorCountDe++;
                         errorElementDe.textContent = 'Errors: ' + errorCountDe;
@@ -329,11 +337,21 @@
                         errorElementCn.textContent = 'Errors: ' + errorCountCn;
                     }
                 }
-
-            } else if (event.key === 'a') {
-                if (experimentActive) {
-                    stopExperiment();
+            } else {
+                // Early key pressed without stimulus
+                if (event.key === 'd') {
+                    errorCountDe++;
+                    errorElementDe.textContent = 'Errors: ' + errorCountDe;
+                } else if (event.key === 'f') {
+                    errorCountCn++;
+                    errorElementCn.textContent = 'Errors: ' + errorCountCn;
+                } else if (event.key === 'g') {
+                    errorCountMx++;
+                    errorElementMx.textContent = 'Errors: ' + errorCountMx;
                 }
+
+                clearTimeout(testStimulusTimeout);
+                startTestTrial();
             }
         });
     </script>
