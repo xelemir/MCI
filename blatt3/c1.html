@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MCI Blatt 3 C1</title>
+    <link rel="stylesheet" type="text/css" href="https://www.gruettecloud.com/static/stylesheet.css">
+    <style>
+        button {
+            font-size: 28px;
+            background-color: #007AFF;
+            color: var(--white-color);
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <main style="display: flex; justify-content: center; align-items: center; height: 100svh; background-color: var(--background-color);">
+        <div style=" padding: 30px; background-color: var(--background-tile-color); display: flex; justify-content: center; align-items: center; border-radius: 20px; flex-direction: column; gap: 5px;">
+            <h1 style="font-size: 48px; color: var(--text-color); margin-bottom: 25px; color: #0056b3;">Enter the expression:</h1>
+            <p id="expression" style="margin-bottom: 20px; color: var(--text-color); font-size: 22px;"></p>
+            <div id="entered" style="display: flex; justify-content: center; background-color: var(--secondary-color); width: auto; height: 50px; border-radius: 5px; justify-content: center; align-items: center; width: 160px;"></div>
+            <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                <button id="button0" onclick="buttonPressed(0)">0</button>
+                <button id="button1" onclick="buttonPressed(1)">1</button>
+                <button id="button2" onclick="buttonPressed(2)">2</button>
+                <button id="button3" onclick="buttonPressed(3)">3</button>
+                <button id="button4" onclick="buttonPressed(4)">4</button>
+                <button id="button5" onclick="buttonPressed(5)">5</button>
+                <button id="button6" onclick="buttonPressed(6)">6</button>
+                <button id="button7" onclick="buttonPressed(7)">7</button>
+                <button id="button8" onclick="buttonPressed(8)">8</button>
+                <button id="button9" onclick="buttonPressed(9)">9</button>
+                <button id="buttonDot" onclick="buttonPressed('.')">.</button>
+                <button id="buttonAsterisk" onclick="buttonPressed('*')">*</button>
+                <button id="buttonEquals" onclick="buttonPressed('=')">=</button>
+            </div>
+            <div id="results" style="display: none; flex-direction: column; gap: 10px; margin-top: 20px;">
+                <p style="margin-top: 30px; color: var(--text-color);">IDs: <span id="IDs"></span></p>
+                <p style="margin-top: 10px; color: var(--text-color);">MTs: <span id="MTs"></span></p>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
+
+<script>
+    let resultGlobal = [];
+    let resultGlobalValue = 0;
+    let iterator_index = 0;
+    let timestamp = null;
+
+    let indexes_of_difficulty = [];
+    let movement_times = [];
+
+    function getCoordinatesOfElement(element) {
+        let offsetLeft = parseInt(element.getBoundingClientRect().left);
+        let offsetRight = parseInt(element.getBoundingClientRect().right);
+        let offsetTop = parseInt(element.getBoundingClientRect().top);
+        let offsetBottom = parseInt(element.getBoundingClientRect().bottom);
+
+        return [(offsetLeft + offsetRight) / 2, (offsetTop + offsetBottom) / 2];
+    }
+
+    let positions_of_buttons = {
+        "1": getCoordinatesOfElement(document.getElementById("button1")),
+        "2": getCoordinatesOfElement(document.getElementById("button2")),
+        "3": getCoordinatesOfElement(document.getElementById("button3")),
+        "4": getCoordinatesOfElement(document.getElementById("button4")),
+        "5": getCoordinatesOfElement(document.getElementById("button5")),
+        "6": getCoordinatesOfElement(document.getElementById("button6")),
+        "7": getCoordinatesOfElement(document.getElementById("button7")),
+        "8": getCoordinatesOfElement(document.getElementById("button8")),
+        "9": getCoordinatesOfElement(document.getElementById("button9")),
+        "0": getCoordinatesOfElement(document.getElementById("button0")),
+        ".": getCoordinatesOfElement(document.getElementById("buttonDot")),
+        "*": getCoordinatesOfElement(document.getElementById("buttonAsterisk")),
+        "=": getCoordinatesOfElement(document.getElementById("buttonEquals"))
+    };
+
+    function calculateDistance(position1, position2) {
+        return Math.sqrt(Math.pow(position1[0] - position2[0], 2) + Math.pow(position1[1] - position2[1], 2));
+    }
+
+    function calculateIndexOfDifficulty(charPrevious, charNext) {
+        let elementPrevious = null;
+        let elementNext = null;
+        if (charPrevious == ".") {
+            elementPrevious = document.getElementById("buttonDot");
+        } else if (charPrevious == "*") {
+            elementPrevious = document.getElementById("buttonAsterisk");
+        } else if (charPrevious == "=") {
+            elementPrevious = document.getElementById("buttonEquals");
+        } else {
+            elementPrevious = document.getElementById("button" + charPrevious);
+        }
+
+        if (charNext == ".") {
+            elementNext = document.getElementById("buttonDot");
+        } else if (charNext == "*") {
+            elementNext = document.getElementById("buttonAsterisk");
+        } else if (charNext == "=") {
+            elementNext = document.getElementById("buttonEquals");
+        } else {
+            elementNext = document.getElementById("button" + charNext);
+        }
+
+        let elementNextWidth = parseInt(elementNext.getBoundingClientRect().right - elementNext.getBoundingClientRect().left);
+        let d_by_2_divided_by_w = (2 * calculateDistance(positions_of_buttons[charPrevious.toString()], positions_of_buttons[charNext.toString()])) / elementNextWidth;
+
+        // If same button is pressed again, the distance is 0. In this case, the index of difficulty is set to 0.
+        if (d_by_2_divided_by_w == 0) {
+            indexes_of_difficulty.push(0);
+        } else {
+            indexes_of_difficulty.push(Math.log2(d_by_2_divided_by_w));
+        }
+    }
+
+    function calculateMovementTime() {
+        let currentTime = new Date().getTime();
+        movement_times.push((currentTime - timestamp) / 1000);
+        timestamp = currentTime;
+    }
+
+    function generateRandomCalculation() {
+        let number1_1 = Math.floor(Math.random() * 10);
+        let number1_2 = Math.floor(Math.random() * 10);
+        let number1_3 = Math.floor(Math.random() * 10);
+
+        let number2_1 = Math.floor(Math.random() * 10);
+        let number2_2 = Math.floor(Math.random() * 10);
+        let number2_3 = Math.floor(Math.random() * 10);
+
+        let number1 = `${number1_1}.${number1_2}${number1_3}`;
+        let number2 = `${number2_1}.${number2_2}${number2_3}`;
+
+        document.getElementById("expression").innerHTML = `${number1} * ${number2} = `;
+
+        resultGlobal.push(number1_1.toString());
+        resultGlobal.push(".");
+        resultGlobal.push(number1_2.toString());
+        resultGlobal.push(number1_3.toString());
+        resultGlobal.push("*");
+        resultGlobal.push(number2_1.toString());
+        resultGlobal.push(".");
+        resultGlobal.push(number2_2.toString());
+        resultGlobal.push(number2_3.toString());
+        resultGlobal.push("=");
+
+        let resultTemp = parseFloat(number1) * parseFloat(number2); 
+        resultGlobalValue = resultTemp.toFixed(4); 
+    }
+
+    function displayResult() {
+        document.getElementById("entered").innerHTML = resultGlobalValue;
+
+        let IDs = "";
+        let MTs = "";
+
+        for (let i = 0; i < indexes_of_difficulty.length; i++) {
+            IDs += indexes_of_difficulty[i].toFixed(4) + " ";
+            MTs += movement_times[i].toFixed(4) + " ";
+        }
+
+        document.getElementById("IDs").innerHTML = IDs;
+        document.getElementById("MTs").innerHTML = MTs;
+        document.getElementById("results").style.display = "flex";
+    }
+
+    function buttonPressed(value) {
+        if (iterator_index <= resultGlobal.length - 1 && value == resultGlobal[iterator_index]) {
+            if (iterator_index == 0) {
+                document.getElementById("entered").innerHTML = value;
+                timestamp = new Date().getTime();
+                iterator_index++;
+            } else if (iterator_index == resultGlobal.length - 1) {
+                document.getElementById("entered").innerHTML += value;
+                calculateIndexOfDifficulty(resultGlobal[iterator_index - 1], value);
+                calculateMovementTime();
+
+                stopRound()
+            } else {
+                document.getElementById("entered").innerHTML += value;
+                calculateIndexOfDifficulty(resultGlobal[iterator_index - 1], value);
+                calculateMovementTime();
+                iterator_index++;
+            }
+        }
+    }
+
+    function stopRound() {
+        displayResult();
+        allIndexesOfDifficulty.push(indexes_of_difficulty);
+        allMovementTimes.push(movement_times);
+
+        // Reset all variables
+        resultGlobal = [];
+        resultGlobalValue = 0;
+        iterator_index = 0;
+        timestamp = null;
+        indexes_of_difficulty = [];
+        movement_times = [];
+    }
+
+    generateRandomCalculation();
+</script>
