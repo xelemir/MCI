@@ -72,15 +72,8 @@ class Plotter:
 
 
 if __name__ == '__main__':
-    """plotter = Plotter()
+    plotter = Plotter()
     plotter.process_file('blatt3/jan.txt')
     plotter.process_file('blatt3/george.txt')
     plotter.process_file('blatt3/kevin.txt')
-    plotter.plot_data("compact")"""
-    
-    
-    
-    my_string = "Es ist zu erkennen, dass beim horizontalen Layout mit zunehmendem Index of Difficulty auch die Movement Time steigt. Beim kompakten Layout nimmt die Movement Time hingegen weniger stark zu. Dies könnte darauf zurückzuführen sein, dass die Tasten im horizontalen Layout teils sehr weit auseinanderliegen, während sie im kompakten Layout relativ nahe beieinander angeordnet sind. Folglich ist der kompakte Calculator im Durchschnitt hinsichtlich der Schreibgeschwindigkeit konstant schnell, unabhängig von der Höhe des Index of Difficulty, was ihn zu einer benutzerfreundlicheren und effizienteren GUI macht. Dies verdeutlicht, dass eine engere Anordnung der Tasten die Benutzerfreundlichkeit und Effizienz des Interfaces erheblich verbessert."
-
-
-    print(len(my_string.split()))
+    plotter.plot_data("compact")
