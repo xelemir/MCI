@@ -41,20 +41,26 @@ class Plotter:
 
     
 
-    def plot_data(self):
-        x = np.array(self.id_dataset_calc_line, dtype=float)
-        y = np.array(self.mt_dataset_calc_line, dtype=float)
+    def plot_data(self, calc_type):
+        if calc_type == "horizontal":
+            id_dataset = self.id_dataset_calc_line
+            mt_dataset = self.mt_dataset_calc_line
+        elif calc_type == "compact":
+            id_dataset = self.id_dataset_calc_square
+            mt_dataset = self.mt_dataset_calc_square
+        
+        x = np.array(id_dataset, dtype=float)
+        y = np.array(mt_dataset, dtype=float)
 
         plt.scatter(x, y, marker='o', label='Data points', alpha=0.6)
 
-        # Calculate the regression line
-        coefficients = np.polyfit(x, y, 1)
-        polynomial = np.poly1d(coefficients)
-        y_regression = polynomial(x)
-
-        plt.plot(x, y_regression, color='red', label='Regression line')
-
-        plt.title('Data Points with Regression Line')
+        b, a = np.polyfit(x, y, 1)
+        print(f"a: {a}, b: {b}")
+        
+        y_pred = a + b * x
+        plt.plot(x, y_pred, color='red', label='Regression line')
+        
+        plt.title(f'Index of Difficulty and Movement Time for {calc_type} calculator')
         plt.xlabel('ID')
         plt.ylabel('MT')
 
@@ -66,8 +72,15 @@ class Plotter:
 
 
 if __name__ == '__main__':
-    plotter = Plotter()
-    plotter.process_file('jan.txt')
-    plotter.process_file('george.txt')
-    plotter.process_file('kevin.txt')
-    plotter.plot_data()
+    """plotter = Plotter()
+    plotter.process_file('blatt3/jan.txt')
+    plotter.process_file('blatt3/george.txt')
+    plotter.process_file('blatt3/kevin.txt')
+    plotter.plot_data("compact")"""
+    
+    
+    
+    my_string = "Es ist zu erkennen, dass beim horizontalen Layout mit zunehmendem Index of Difficulty auch die Movement Time steigt. Beim kompakten Layout nimmt die Movement Time hingegen weniger stark zu. Dies könnte darauf zurückzuführen sein, dass die Tasten im horizontalen Layout teils sehr weit auseinanderliegen, während sie im kompakten Layout relativ nahe beieinander angeordnet sind. Folglich ist der kompakte Calculator im Durchschnitt hinsichtlich der Schreibgeschwindigkeit konstant schnell, unabhängig von der Höhe des Index of Difficulty, was ihn zu einer benutzerfreundlicheren und effizienteren GUI macht. Dies verdeutlicht, dass eine engere Anordnung der Tasten die Benutzerfreundlichkeit und Effizienz des Interfaces erheblich verbessert."
+
+
+    print(len(my_string.split()))
